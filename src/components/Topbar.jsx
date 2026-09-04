@@ -1,6 +1,4 @@
-import TimeTrackerWidget from './TimeTrackerWidget'
-
-export default function Topbar({ activeTabTitle, onNewProject, projects, onSaveTime }) {
+export default function Topbar({ activeTabTitle, onNewProject }) {
   return (
     <header className="topbar" id="dashboard-topbar">
       <div className="topbar-left">
@@ -8,10 +6,6 @@ export default function Topbar({ activeTabTitle, onNewProject, projects, onSaveT
       </div>
 
       <div className="topbar-right">
-        {projects && projects.length > 0 && (
-          <TimeTrackerWidget projects={projects} onSaveTime={onSaveTime} />
-        )}
-
         <div className="search-bar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"></circle>

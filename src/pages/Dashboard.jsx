@@ -174,8 +174,6 @@ export default function Dashboard() {
         <Topbar 
           activeTabTitle={tabTitles[activeTab]} 
           onNewProject={() => setIsModalOpen(true)} 
-          projects={projects}
-          onSaveTime={handleSaveTime}
         />
 
         <main className="dashboard-content">
