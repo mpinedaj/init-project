@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 /* ---- SVG Icon Components ---- */
@@ -83,6 +83,46 @@ const features = [
   },
 ]
 
+const testimonials = [
+  {
+    quote: 'Konta cambió por completo cómo organizo mis proyectos de desarrollo. Antes perdía facturas y entregas, ahora todo está a 1 clic.',
+    author: 'Sebastián Morales',
+    role: 'Fullstack Developer',
+    avatar: 'SM'
+  },
+  {
+    quote: 'El tablero Kanban y la vista de ingresos del mes me dan la tranquilidad que necesitaba para enfocarme en diseñar.',
+    author: 'Camila Torres',
+    role: 'UI/UX Designer',
+    avatar: 'CT'
+  },
+  {
+    quote: 'La simplicidad y el tema oscuro son increíbles. Es la única herramienta freelance que no me da pereza usar todos los días.',
+    author: 'Daniel Rivas',
+    role: 'Consultor SEO & Growth',
+    avatar: 'DR'
+  }
+]
+
+const faqs = [
+  {
+    question: '¿Konta es realmente gratis para empezar?',
+    answer: 'Sí. El plan Free te permite gestionar hasta 3 clientes y proyectos activos de forma indefinida sin necesidad de ingresar tarjeta de crédito.'
+  },
+  {
+    question: '¿Mis datos están seguros?',
+    answer: 'Absolutamente. Utilizamos almacenamiento cifrado en la nube y conexiones seguras SSL de 256 bits para garantizar la privacidad de tus clientes y montos.'
+  },
+  {
+    question: '¿Puedo exportar mis facturas y proyectos?',
+    answer: 'Sí, todas tus facturas y reportes se pueden descargar o imprimir directamente en PDF con un formato profesional adaptado a tu marca.'
+  },
+  {
+    question: '¿Cómo funciona la integración con la nube?',
+    answer: 'Konta sincroniza automáticamente tus datos entre tus dispositivos (laptop, tablet o móvil) para que siempre tengas la información actualizada.'
+  }
+]
+
 const freePlan = [
   'Hasta 3 clientes',
   '5 facturas al mes',
@@ -103,6 +143,8 @@ const proPlan = [
 export default function Landing() {
   const navigate = useNavigate()
   const observerRef = useRef(null)
+  const [openFaq, setOpenFaq] = useState(null)
+  const [previewTab, setPreviewTab] = useState('kanban')
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -133,8 +175,10 @@ export default function Landing() {
             Konta
           </a>
           <div className="navbar-links">
+            <a href="#demo" id="nav-demo">Demo</a>
             <a href="#features" id="nav-features">Funcionalidades</a>
             <a href="#pricing" id="nav-pricing">Precios</a>
+            <a href="#faq" id="nav-faq">FAQ</a>
           </div>
           <div className="navbar-actions">
             <button className="btn btn-ghost" id="btn-login" onClick={() => navigate('/dashboard')}>
@@ -170,7 +214,7 @@ export default function Landing() {
               Comenzar gratis {Icons.arrow}
             </button>
             <button className="btn btn-outline btn-lg" id="hero-cta-secondary" onClick={() => navigate('/dashboard')}>
-              Ver demo
+              Ver demo interactiva
             </button>
           </div>
 
@@ -191,6 +235,130 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ===== DEMO SHOWCASE INTERACTIVO ===== */}
+      <section className="section showcase-section" id="demo">
+        <div className="section-header animate-on-scroll">
+          <span className="section-label">Experiencia en vivo</span>
+          <h2 className="section-title">Diseñado para la velocidad</h2>
+          <p className="section-subtitle">
+            Explora la interfaz de Konta sin rodeos. Cambia entre pestañas para ver cómo organizamos tu trabajo.
+          </p>
+        </div>
+
+        <div className="showcase-container animate-on-scroll">
+          <div className="showcase-header">
+            <div className="showcase-dots">
+              <span className="dot red"></span>
+              <span className="dot yellow"></span>
+              <span className="dot green"></span>
+            </div>
+            <div className="showcase-tabs">
+              <button 
+                className={`showcase-tab ${previewTab === 'kanban' ? 'active' : ''}`}
+                onClick={() => setPreviewTab('kanban')}
+              >
+                Kanban de Proyectos
+              </button>
+              <button 
+                className={`showcase-tab ${previewTab === 'stats' ? 'active' : ''}`}
+                onClick={() => setPreviewTab('stats')}
+              >
+                Métricas & Ingresos
+              </button>
+              <button 
+                className={`showcase-tab ${previewTab === 'invoices' ? 'active' : ''}`}
+                onClick={() => setPreviewTab('invoices')}
+              >
+                Facturación
+              </button>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/dashboard')}>
+              Abrir Dashboard →
+            </button>
+          </div>
+
+          <div className="showcase-body">
+            {previewTab === 'kanban' && (
+              <div className="preview-content">
+                <div className="preview-grid-3col">
+                  <div className="preview-col">
+                    <div className="preview-col-title">Por Hacer (1)</div>
+                    <div className="preview-card">
+                      <span className="preview-tag blue">E-Commerce</span>
+                      <h4>Dashboard Analytics React</h4>
+                      <p className="text-xs text-muted">Cliente: Solaris Energy</p>
+                    </div>
+                  </div>
+                  <div className="preview-col">
+                    <div className="preview-col-title">En Progreso (2)</div>
+                    <div className="preview-card highlight">
+                      <span className="preview-tag emerald">Branding</span>
+                      <h4>Rediseño Web & App Móvil</h4>
+                      <p className="text-xs text-muted">Cliente: Acme Studio • $2,800</p>
+                    </div>
+                  </div>
+                  <div className="preview-col">
+                    <div className="preview-col-title">Completado (1)</div>
+                    <div className="preview-card">
+                      <span className="preview-tag purple">Diseño</span>
+                      <h4>Manual de Marca Konta</h4>
+                      <p className="text-xs text-muted">Cliente: Kira Coffee Co.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {previewTab === 'stats' && (
+              <div className="preview-content">
+                <div className="preview-stats-row">
+                  <div className="preview-stat-box">
+                    <span className="text-xs text-muted">Ingresos del Mes</span>
+                    <div className="text-2xl font-bold text-emerald-400">$4,850.00</div>
+                    <span className="text-xs text-emerald-400">↑ +14% vs mes anterior</span>
+                  </div>
+                  <div className="preview-stat-box">
+                    <span className="text-xs text-muted">Facturas Pendientes</span>
+                    <div className="text-2xl font-bold text-amber-400">$3,800.00</div>
+                    <span className="text-xs text-muted">2 clientes por cobrar</span>
+                  </div>
+                  <div className="preview-stat-box">
+                    <span className="text-xs text-muted">Horas Facturadas</span>
+                    <div className="text-2xl font-bold">42.5 hrs</div>
+                    <span className="text-xs text-muted">Tarifa: $50/hr</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {previewTab === 'invoices' && (
+              <div className="preview-content">
+                <div className="preview-table">
+                  <div className="preview-tr header">
+                    <span>Factura</span>
+                    <span>Cliente</span>
+                    <span>Monto</span>
+                    <span>Estado</span>
+                  </div>
+                  <div className="preview-tr">
+                    <span className="font-mono text-xs">INV-2026-001</span>
+                    <span>Acme Studio</span>
+                    <span className="font-semibold">$1,400.00</span>
+                    <span className="status-badge pagada">Pagada</span>
+                  </div>
+                  <div className="preview-tr">
+                    <span className="font-mono text-xs">INV-2026-002</span>
+                    <span>TechNova Labs</span>
+                    <span className="font-semibold">$2,250.00</span>
+                    <span className="status-badge pendiente">Pendiente</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* ===== FEATURES ===== */}
       <section className="section" id="features">
         <div className="section-header animate-on-scroll">
@@ -207,6 +375,33 @@ export default function Landing() {
               <div className="feature-icon">{feature.icon}</div>
               <h3>{feature.title}</h3>
               <p>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== TESTIMONIALS ===== */}
+      <section className="section testimonials-section" id="testimonials">
+        <div className="section-header animate-on-scroll">
+          <span className="section-label">Prueba Social</span>
+          <h2 className="section-title">Diseñado para profesionales</h2>
+          <p className="section-subtitle">
+            Descubre por qué cientos de freelancers gestionan su negocio con Konta.
+          </p>
+        </div>
+
+        <div className="testimonials-grid animate-on-scroll">
+          {testimonials.map((t, i) => (
+            <div key={i} className="testimonial-card">
+              <div className="stars">★★★★★</div>
+              <p className="quote">"{t.quote}"</p>
+              <div className="author-info">
+                <div className="author-avatar">{t.avatar}</div>
+                <div>
+                  <div className="author-name">{t.author}</div>
+                  <div className="author-role">{t.role}</div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -276,6 +471,37 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ===== FAQ ===== */}
+      <section className="section faq-section" id="faq">
+        <div className="section-header animate-on-scroll">
+          <span className="section-label">FAQ</span>
+          <h2 className="section-title">Preguntas Frecuentes</h2>
+          <p className="section-subtitle">
+            Todo lo que necesitas saber antes de comenzar.
+          </p>
+        </div>
+
+        <div className="faq-container animate-on-scroll">
+          {faqs.map((faq, i) => (
+            <div 
+              key={i} 
+              className={`faq-item ${openFaq === i ? 'open' : ''}`}
+              onClick={() => setOpenFaq(openFaq === i ? null : i)}
+            >
+              <div className="faq-question">
+                <span>{faq.question}</span>
+                <span className="faq-toggle">{openFaq === i ? '−' : '+'}</span>
+              </div>
+              {openFaq === i && (
+                <div className="faq-answer">
+                  <p>{faq.answer}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ===== CTA ===== */}
       <section className="section cta-section" id="cta">
         <div className="cta-box animate-on-scroll">
@@ -298,10 +524,10 @@ export default function Landing() {
             Konta
           </div>
           <div className="footer-links">
+            <a href="#demo">Demo</a>
             <a href="#features">Funcionalidades</a>
             <a href="#pricing">Precios</a>
-            <a href="#">Privacidad</a>
-            <a href="#">Términos</a>
+            <a href="#faq">FAQ</a>
           </div>
           <div className="footer-copy">
             © {new Date().getFullYear()} Konta

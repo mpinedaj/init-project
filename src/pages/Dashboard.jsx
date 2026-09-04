@@ -4,6 +4,7 @@ import Topbar from '../components/Topbar'
 import StatCard from '../components/StatCard'
 import KanbanBoard from '../components/KanbanBoard'
 import ProjectDetailModal from '../components/ProjectDetailModal'
+import Toast from '../components/Toast'
 
 const initialProjects = [
   { 
@@ -14,7 +15,7 @@ const initialProjects = [
     priority: 'Alta',
     budget: '$2,800', 
     deadline: '15 Sep, 2026',
-    hoursTracked: 16200, // in seconds (4.5 hrs)
+    hoursTracked: 16200, // 4.5 hrs
     tasks: [
       { id: 1, text: 'Definir paleta de colores y tipografía', done: true },
       { id: 2, text: 'Diseño de la página principal', done: true },
@@ -85,10 +86,10 @@ const initialProjects = [
 ]
 
 const initialClients = [
-  { id: 1, name: 'Acme Studio', contact: 'Laura García', email: 'laura@acme.com', activeProjects: 1, totalBilled: '$8,400' },
-  { id: 2, name: 'TechNova Labs', contact: 'Carlos Ruiz', email: 'carlos@technova.io', activeProjects: 1, totalBilled: '$12,000' },
-  { id: 3, name: 'Kira Coffee Co.', contact: 'Elena Rostova', email: 'elena@kiracoffee.com', activeProjects: 0, totalBilled: '$3,500' },
-  { id: 4, name: 'FinPay Corp', contact: 'David Miller', email: 'david@finpay.com', activeProjects: 1, totalBilled: '$6,200' },
+  { id: 1, name: 'Acme Studio', contact: 'Laura García', email: 'laura@acme.com', activeProjects: 1, totalBilled: '$8,400', pct: 40 },
+  { id: 2, name: 'TechNova Labs', contact: 'Carlos Ruiz', email: 'carlos@technova.io', activeProjects: 1, totalBilled: '$12,000', pct: 35 },
+  { id: 3, name: 'Kira Coffee Co.', contact: 'Elena Rostova', email: 'elena@kiracoffee.com', activeProjects: 0, totalBilled: '$3,500', pct: 15 },
+  { id: 4, name: 'FinPay Corp', contact: 'David Miller', email: 'david@finpay.com', activeProjects: 1, totalBilled: '$6,200', pct: 10 },
 ]
 
 const initialInvoices = [
@@ -104,6 +105,10 @@ export default function Dashboard() {
   const [clients, setClients] = useState(initialClients)
   const [invoices, setInvoices] = useState(initialInvoices)
   
+  // Search & Toast state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [toastMessage, setToastMessage] = useState(null)
+
   // Selected project for modal detail
   const [selectedProject, setSelectedProject] = useState(null)
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'table'
@@ -116,6 +121,10 @@ export default function Dashboard() {
   const [newProjectDeadline, setNewProjectDeadline] = useState('')
   const [newProjectPriority, setNewProjectPriority] = useState('Media')
 
+  const showToast = (msg) => {
+    setToastMessage(msg)
+  }
+
   const tabTitles = {
     overview: 'Inicio & Resumen',
     projects: 'Gestión de Proyectos & Kanban',
@@ -123,6 +132,25 @@ export default function Dashboard() {
     invoices: 'Facturación & Pagos',
     settings: 'Configuración de la Cuenta'
   }
+
+  // Dynamic search filtering
+  const filteredProjects = projects.filter(p => 
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    p.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.status.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredClients = clients.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.contact.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredInvoices = invoices.filter(inv =>
+    inv.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    inv.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    inv.status.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleAddProject = (e) => {
     e.preventDefault()
@@ -148,23 +176,19 @@ export default function Dashboard() {
     setNewProjectBudget('')
     setNewProjectDeadline('')
     setIsModalOpen(false)
+    showToast(`Proyecto "${newObj.title}" creado con éxito ✨`)
   }
 
   const handleMoveProject = (projectId, newStatus) => {
+    const proj = projects.find(p => p.id === projectId)
     setProjects(projects.map(p => p.id === projectId ? { ...p, status: newStatus } : p))
-  }
-
-  const handleSaveTime = (projectId, secondsAdded) => {
-    setProjects(projects.map(p => p.id === projectId ? { ...p, hoursTracked: (p.hoursTracked || 0) + secondsAdded } : p))
+    showToast(`Proyecto "${proj.title}" movido a ${newStatus}`)
   }
 
   const handleUpdateProject = (updatedProject) => {
     setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p))
     setSelectedProject(updatedProject)
   }
-
-  const totalTrackedSeconds = projects.reduce((sum, p) => sum + (p.hoursTracked || 0), 0)
-  const totalTrackedHours = (totalTrackedSeconds / 3600).toFixed(1)
 
   return (
     <div className="dashboard-layout" id="dashboard-root">
@@ -174,9 +198,17 @@ export default function Dashboard() {
         <Topbar 
           activeTabTitle={tabTitles[activeTab]} 
           onNewProject={() => setIsModalOpen(true)} 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
         <main className="dashboard-content">
+          {searchQuery && (
+            <div className="search-active-banner">
+              Resultados para: <strong>"{searchQuery}"</strong> ({filteredProjects.length} proyectos, {filteredClients.length} clientes, {filteredInvoices.length} facturas)
+            </div>
+          )}
+
           {/* ================= OVERVIEW TAB ================= */}
           {activeTab === 'overview' && (
             <div className="tab-content" id="tab-overview">
@@ -193,11 +225,11 @@ export default function Dashboard() {
                   }
                 />
                 <StatCard 
-                  title="Horas Registradas" 
-                  value={`${totalTrackedHours}h`} 
-                  change="Cronómetro activo" 
-                  isPositive={true} 
-                  subtitle="Tarifa media: $50/h"
+                  title="Facturas Pendientes" 
+                  value="$3,800" 
+                  change="2 pendientes" 
+                  isPositive={false} 
+                  subtitle="Vencimiento medio: 5 días"
                   icon={
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   }
@@ -224,6 +256,31 @@ export default function Dashboard() {
                 />
               </div>
 
+              {/* Financial Breakdown Bar Visual */}
+              <div className="card mb-6">
+                <div className="card-header">
+                  <div>
+                    <h3>Distribución de Ingresos por Cliente</h3>
+                    <p className="card-subtitle">Desglose de facturación acumulada del trimestre</p>
+                  </div>
+                  <span className="text-emerald-400 font-bold">$30,100.00 Total</span>
+                </div>
+                <div className="financial-bar-container">
+                  <div className="financial-bar">
+                    <div className="bar-segment seg-1" style={{ width: '40%' }} title="Acme Studio 40%"></div>
+                    <div className="bar-segment seg-2" style={{ width: '35%' }} title="TechNova Labs 35%"></div>
+                    <div className="bar-segment seg-3" style={{ width: '15%' }} title="Kira Coffee Co. 15%"></div>
+                    <div className="bar-segment seg-4" style={{ width: '10%' }} title="FinPay Corp 10%"></div>
+                  </div>
+                  <div className="financial-legend">
+                    <span className="legend-item"><span className="dot seg-1"></span> Acme Studio (40%)</span>
+                    <span className="legend-item"><span className="dot seg-2"></span> TechNova Labs (35%)</span>
+                    <span className="legend-item"><span className="dot seg-3"></span> Kira Coffee (15%)</span>
+                    <span className="legend-item"><span className="dot seg-4"></span> FinPay Corp (10%)</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Kanban Vista Previa */}
               <div className="card mb-6">
                 <div className="card-header">
@@ -234,7 +291,7 @@ export default function Dashboard() {
                   <button className="btn-link" onClick={() => setActiveTab('projects')}>Pantalla completa →</button>
                 </div>
                 <KanbanBoard 
-                  projects={projects} 
+                  projects={filteredProjects} 
                   onMoveProject={handleMoveProject}
                   onSelectProject={(p) => setSelectedProject(p)}
                 />
@@ -274,7 +331,7 @@ export default function Dashboard() {
 
                 {viewMode === 'kanban' ? (
                   <KanbanBoard 
-                    projects={projects} 
+                    projects={filteredProjects} 
                     onMoveProject={handleMoveProject}
                     onSelectProject={(p) => setSelectedProject(p)}
                   />
@@ -292,7 +349,7 @@ export default function Dashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {projects.map((p) => (
+                        {filteredProjects.map((p) => (
                           <tr key={p.id} className="cursor-pointer" onClick={() => setSelectedProject(p)}>
                             <td className="font-medium">{p.title}</td>
                             <td className="text-secondary">{p.client}</td>
@@ -340,7 +397,7 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {clients.map((c) => (
+                      {filteredClients.map((c) => (
                         <tr key={c.id}>
                           <td className="font-medium">{c.name}</td>
                           <td className="text-secondary">{c.contact}</td>
@@ -379,7 +436,7 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {invoices.map((inv) => (
+                      {filteredInvoices.map((inv) => (
                         <tr key={inv.id}>
                           <td className="font-mono text-sm">{inv.id}</td>
                           <td className="font-medium">{inv.client}</td>
@@ -396,6 +453,7 @@ export default function Dashboard() {
                                 className="btn btn-outline btn-sm"
                                 onClick={() => {
                                   setInvoices(invoices.map(i => i.id === inv.id ? { ...i, status: 'Pagada' } : i))
+                                  showToast(`Factura ${inv.id} marcada como Pagada ✓`)
                                 }}
                               >
                                 Marcar Pagada
@@ -418,7 +476,7 @@ export default function Dashboard() {
                 <div className="card-header">
                   <h3>Configuración de Perfil Freelance</h3>
                 </div>
-                <form className="settings-form" onSubmit={(e) => { e.preventDefault(); alert('Configuración guardada exitosamente') }}>
+                <form className="settings-form" onSubmit={(e) => { e.preventDefault(); showToast('Configuración guardada exitosamente ✓') }}>
                   <div className="form-group">
                     <label>Nombre Completo</label>
                     <input type="text" defaultValue="Martín Pineda" className="form-input" />
@@ -447,6 +505,11 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
 
       {/* ================= MODAL DETALLE DE PROYECTO ================= */}
       {selectedProject && (

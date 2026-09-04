@@ -1,4 +1,4 @@
-export default function Topbar({ activeTabTitle, onNewProject }) {
+export default function Topbar({ activeTabTitle, onNewProject, searchQuery, setSearchQuery }) {
   return (
     <header className="topbar" id="dashboard-topbar">
       <div className="topbar-left">
@@ -11,7 +11,16 @@ export default function Topbar({ activeTabTitle, onNewProject }) {
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" placeholder="Buscar clientes, proyectos..." id="dashboard-search-input" />
+          <input 
+            type="text" 
+            placeholder="Buscar cliente, proyecto, factura..." 
+            id="dashboard-search-input" 
+            value={searchQuery || ''}
+            onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button className="search-clear-btn" onClick={() => setSearchQuery('')}>×</button>
+          )}
         </div>
 
         <button className="icon-btn" id="btn-notifications" title="Notificaciones">
