@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /* ---- SVG Icon Components ---- */
 const Icons = {
