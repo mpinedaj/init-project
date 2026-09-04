@@ -2,13 +2,86 @@ import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import StatCard from '../components/StatCard'
+import KanbanBoard from '../components/KanbanBoard'
+import ProjectDetailModal from '../components/ProjectDetailModal'
 
 const initialProjects = [
-  { id: 1, title: 'Rediseño E-commerce Web', client: 'Acme Studio', status: 'En Progreso', budget: '$2,800', deadline: '15 Sep, 2026' },
-  { id: 2, title: 'App Móvil iOS & Android', client: 'TechNova Labs', status: 'En Revisión', budget: '$4,500', deadline: '20 Sep, 2026' },
-  { id: 3, title: 'Branding & Identidad Visual', client: 'Kira Coffee Co.', status: 'Completado', budget: '$1,200', deadline: '01 Sep, 2026' },
-  { id: 4, title: 'Auditoría de Seguridad API', client: 'FinPay Corp', status: 'En Progreso', budget: '$3,100', deadline: '30 Sep, 2026' },
-  { id: 5, title: 'Dashboard Analytics React', client: 'Solaris Energy', status: 'Pendiente', budget: '$1,950', deadline: '10 Oct, 2026' },
+  { 
+    id: 1, 
+    title: 'Rediseño E-commerce Web', 
+    client: 'Acme Studio', 
+    status: 'En Progreso', 
+    priority: 'Alta',
+    budget: '$2,800', 
+    deadline: '15 Sep, 2026',
+    hoursTracked: 16200, // in seconds (4.5 hrs)
+    tasks: [
+      { id: 1, text: 'Definir paleta de colores y tipografía', done: true },
+      { id: 2, text: 'Diseño de la página principal', done: true },
+      { id: 3, text: 'Integración con pasarela de pagos Stripe', done: false },
+      { id: 4, text: 'Pruebas responsive en móviles', done: false },
+    ]
+  },
+  { 
+    id: 2, 
+    title: 'App Móvil iOS & Android', 
+    client: 'TechNova Labs', 
+    status: 'En Revisión', 
+    priority: 'Alta',
+    budget: '$4,500', 
+    deadline: '20 Sep, 2026',
+    hoursTracked: 32400, // 9.0 hrs
+    tasks: [
+      { id: 1, text: 'Arquitectura en React Native', done: true },
+      { id: 2, text: 'Autenticación con Firebase', done: true },
+      { id: 3, text: 'Publicación en TestFlight', done: true },
+      { id: 4, text: 'Aprobación en App Store', done: false },
+    ]
+  },
+  { 
+    id: 3, 
+    title: 'Branding & Identidad Visual', 
+    client: 'Kira Coffee Co.', 
+    status: 'Completado', 
+    priority: 'Media',
+    budget: '$1,200', 
+    deadline: '01 Sep, 2026',
+    hoursTracked: 21600, // 6.0 hrs
+    tasks: [
+      { id: 1, text: 'Vectorización de logotipo principal', done: true },
+      { id: 2, text: 'Manual de uso de marca', done: true },
+      { id: 3, text: 'Diseño de empaques para café', done: true },
+    ]
+  },
+  { 
+    id: 4, 
+    title: 'Auditoría de Seguridad API', 
+    client: 'FinPay Corp', 
+    status: 'En Progreso', 
+    priority: 'Baja',
+    budget: '$3,100', 
+    deadline: '30 Sep, 2026',
+    hoursTracked: 7200, // 2.0 hrs
+    tasks: [
+      { id: 1, text: 'Análisis de vulnerabilidades OWASP', done: true },
+      { id: 2, text: 'Reporte de tokens JWT y cifrado', done: false },
+      { id: 3, text: 'Documentación de parches de seguridad', done: false },
+    ]
+  },
+  { 
+    id: 5, 
+    title: 'Dashboard Analytics React', 
+    client: 'Solaris Energy', 
+    status: 'Pendiente', 
+    priority: 'Media',
+    budget: '$1,950', 
+    deadline: '10 Oct, 2026',
+    hoursTracked: 0,
+    tasks: [
+      { id: 1, text: 'Estructuración de componentes de gráfica', done: false },
+      { id: 2, text: 'Conexión con base de datos PostgreSQL', done: false },
+    ]
+  },
 ]
 
 const initialClients = [
@@ -31,16 +104,21 @@ export default function Dashboard() {
   const [clients, setClients] = useState(initialClients)
   const [invoices, setInvoices] = useState(initialInvoices)
   
-  // Modal State
+  // Selected project for modal detail
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'table'
+
+  // Modal New Project State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newProjectTitle, setNewProjectTitle] = useState('')
   const [newProjectClient, setNewProjectClient] = useState('Acme Studio')
   const [newProjectBudget, setNewProjectBudget] = useState('')
   const [newProjectDeadline, setNewProjectDeadline] = useState('')
+  const [newProjectPriority, setNewProjectPriority] = useState('Media')
 
   const tabTitles = {
     overview: 'Inicio & Resumen',
-    projects: 'Gestión de Proyectos',
+    projects: 'Gestión de Proyectos & Kanban',
     clients: 'Directorio de Clientes',
     invoices: 'Facturación & Pagos',
     settings: 'Configuración de la Cuenta'
@@ -54,9 +132,15 @@ export default function Dashboard() {
       id: Date.now(),
       title: newProjectTitle,
       client: newProjectClient,
-      status: 'En Progreso',
+      status: 'Pendiente',
+      priority: newProjectPriority,
       budget: newProjectBudget ? `$${newProjectBudget}` : '$1,000',
-      deadline: newProjectDeadline || '30 Sep, 2026'
+      deadline: newProjectDeadline || '30 Sep, 2026',
+      hoursTracked: 0,
+      tasks: [
+        { id: 1, text: 'Definir alcance y entregar propuesta', done: false },
+        { id: 2, text: 'Desarrollo de entregables principales', done: false }
+      ]
     }
 
     setProjects([newObj, ...projects])
@@ -66,6 +150,22 @@ export default function Dashboard() {
     setIsModalOpen(false)
   }
 
+  const handleMoveProject = (projectId, newStatus) => {
+    setProjects(projects.map(p => p.id === projectId ? { ...p, status: newStatus } : p))
+  }
+
+  const handleSaveTime = (projectId, secondsAdded) => {
+    setProjects(projects.map(p => p.id === projectId ? { ...p, hoursTracked: (p.hoursTracked || 0) + secondsAdded } : p))
+  }
+
+  const handleUpdateProject = (updatedProject) => {
+    setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p))
+    setSelectedProject(updatedProject)
+  }
+
+  const totalTrackedSeconds = projects.reduce((sum, p) => sum + (p.hoursTracked || 0), 0)
+  const totalTrackedHours = (totalTrackedSeconds / 3600).toFixed(1)
+
   return (
     <div className="dashboard-layout" id="dashboard-root">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -74,6 +174,8 @@ export default function Dashboard() {
         <Topbar 
           activeTabTitle={tabTitles[activeTab]} 
           onNewProject={() => setIsModalOpen(true)} 
+          projects={projects}
+          onSaveTime={handleSaveTime}
         />
 
         <main className="dashboard-content">
@@ -93,18 +195,18 @@ export default function Dashboard() {
                   }
                 />
                 <StatCard 
-                  title="Facturas Pendientes" 
-                  value="$3,800" 
-                  change="2 pendientes" 
-                  isPositive={false} 
-                  subtitle="Vencimiento medio: 5 días"
+                  title="Horas Registradas" 
+                  value={`${totalTrackedHours}h`} 
+                  change="Cronómetro activo" 
+                  isPositive={true} 
+                  subtitle="Tarifa media: $50/h"
                   icon={
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   }
                 />
                 <StatCard 
                   title="Proyectos Activos" 
-                  value={projects.filter(p => p.status === 'En Progreso').length.toString()} 
+                  value={projects.filter(p => p.status === 'En Progreso' || p.status === 'En Revisión').length.toString()} 
                   change="+2 este mes" 
                   isPositive={true} 
                   subtitle="Capacidad: 80%"
@@ -124,75 +226,20 @@ export default function Dashboard() {
                 />
               </div>
 
-              {/* Recent Activity & Projects */}
-              <div className="dashboard-grid-2col">
-                {/* Recent Projects Card */}
-                <div className="card">
-                  <div className="card-header">
-                    <h3>Proyectos Recientes</h3>
-                    <button className="btn-link" onClick={() => setActiveTab('projects')}>Ver todos →</button>
+              {/* Kanban Vista Previa */}
+              <div className="card mb-6">
+                <div className="card-header">
+                  <div>
+                    <h3>Flujo de Trabajo (Kanban)</h3>
+                    <p className="card-subtitle">Haz clic en cualquier proyecto para ver sus tareas o mover su estado</p>
                   </div>
-                  <div className="table-responsive">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Proyecto</th>
-                          <th>Cliente</th>
-                          <th>Estado</th>
-                          <th>Presupuesto</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {projects.slice(0, 4).map((p) => (
-                          <tr key={p.id}>
-                            <td className="font-medium">{p.title}</td>
-                            <td className="text-secondary">{p.client}</td>
-                            <td>
-                              <span className={`status-badge ${p.status.toLowerCase().replace(' ', '-')}`}>
-                                {p.status}
-                              </span>
-                            </td>
-                            <td className="font-semibold">{p.budget}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <button className="btn-link" onClick={() => setActiveTab('projects')}>Pantalla completa →</button>
                 </div>
-
-                {/* Recent Invoices Card */}
-                <div className="card">
-                  <div className="card-header">
-                    <h3>Facturación Reciente</h3>
-                    <button className="btn-link" onClick={() => setActiveTab('invoices')}>Ver facturas →</button>
-                  </div>
-                  <div className="table-responsive">
-                    <table className="data-table">
-                      <thead>
-                        <tr>
-                          <th>Factura</th>
-                          <th>Cliente</th>
-                          <th>Monto</th>
-                          <th>Estado</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {invoices.map((inv) => (
-                          <tr key={inv.id}>
-                            <td className="font-mono text-sm">{inv.id}</td>
-                            <td>{inv.client}</td>
-                            <td className="font-semibold">{inv.amount}</td>
-                            <td>
-                              <span className={`status-badge ${inv.status.toLowerCase()}`}>
-                                {inv.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                <KanbanBoard 
+                  projects={projects} 
+                  onMoveProject={handleMoveProject}
+                  onSelectProject={(p) => setSelectedProject(p)}
+                />
               </div>
             </div>
           )}
@@ -203,54 +250,72 @@ export default function Dashboard() {
               <div className="card">
                 <div className="card-header">
                   <div>
-                    <h3>Listado de Proyectos</h3>
-                    <p className="card-subtitle">Administra entregables, estados y presupuestos por cliente</p>
+                    <h3>Tablero de Proyectos</h3>
+                    <p className="card-subtitle">Gestiona tareas, sub-entregables y progreso en tiempo real</p>
                   </div>
-                  <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                    + Nuevo Proyecto
-                  </button>
+                  <div className="header-actions">
+                    <div className="view-toggle">
+                      <button 
+                        className={`toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                        onClick={() => setViewMode('kanban')}
+                      >
+                        Kanban
+                      </button>
+                      <button 
+                        className={`toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                        onClick={() => setViewMode('table')}
+                      >
+                        Tabla
+                      </button>
+                    </div>
+                    <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                      + Nuevo Proyecto
+                    </button>
+                  </div>
                 </div>
-                <div className="table-responsive">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Proyecto</th>
-                        <th>Cliente</th>
-                        <th>Fecha Límite</th>
-                        <th>Presupuesto</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {projects.map((p) => (
-                        <tr key={p.id}>
-                          <td className="font-medium">{p.title}</td>
-                          <td className="text-secondary">{p.client}</td>
-                          <td>{p.deadline}</td>
-                          <td className="font-semibold">{p.budget}</td>
-                          <td>
-                            <span className={`status-badge ${p.status.toLowerCase().replace(' ', '-')}`}>
-                              {p.status}
-                            </span>
-                          </td>
-                          <td>
-                            <button 
-                              className="btn-action-icon"
-                              title="Cambiar estado"
-                              onClick={() => {
-                                const nextStatus = p.status === 'En Progreso' ? 'En Revisión' : p.status === 'En Revisión' ? 'Completado' : 'En Progreso'
-                                setProjects(projects.map(proj => proj.id === p.id ? { ...proj, status: nextStatus } : proj))
-                              }}
-                            >
-                              ↻
-                            </button>
-                          </td>
+
+                {viewMode === 'kanban' ? (
+                  <KanbanBoard 
+                    projects={projects} 
+                    onMoveProject={handleMoveProject}
+                    onSelectProject={(p) => setSelectedProject(p)}
+                  />
+                ) : (
+                  <div className="table-responsive">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>Proyecto</th>
+                          <th>Cliente</th>
+                          <th>Prioridad</th>
+                          <th>Horas</th>
+                          <th>Presupuesto</th>
+                          <th>Estado</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {projects.map((p) => (
+                          <tr key={p.id} className="cursor-pointer" onClick={() => setSelectedProject(p)}>
+                            <td className="font-medium">{p.title}</td>
+                            <td className="text-secondary">{p.client}</td>
+                            <td>
+                              <span className={`priority-badge ${(p.priority || 'Media').toLowerCase()}`}>
+                                {p.priority || 'Media'}
+                              </span>
+                            </td>
+                            <td className="font-mono text-sm">{p.hoursTracked ? `${(p.hoursTracked / 3600).toFixed(1)}h` : '0h'}</td>
+                            <td className="font-semibold">{p.budget}</td>
+                            <td>
+                              <span className={`status-badge ${p.status.toLowerCase().replace(' ', '-')}`}>
+                                {p.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -261,8 +326,8 @@ export default function Dashboard() {
               <div className="card">
                 <div className="card-header">
                   <div>
-                    <h3>Clientes Registrados</h3>
-                    <p className="card-subtitle">Directorio de contacto e historial comercial</p>
+                    <h3>Directorio de Clientes</h3>
+                    <p className="card-subtitle">Contacto e historial comercial con cada cuenta</p>
                   </div>
                 </div>
                 <div className="table-responsive">
@@ -365,6 +430,10 @@ export default function Dashboard() {
                     <input type="email" defaultValue="martin@ejemplo.com" className="form-input" />
                   </div>
                   <div className="form-group">
+                    <label>Tarifa por Hora ($ / hr)</label>
+                    <input type="number" defaultValue="50" className="form-input" />
+                  </div>
+                  <div className="form-group">
                     <label>Moneda Preferida</label>
                     <select defaultValue="USD" className="form-input">
                       <option value="USD">USD ($)</option>
@@ -373,10 +442,6 @@ export default function Dashboard() {
                       <option value="COP">COP ($)</option>
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label>Nombre Comercial / Marca Personal</label>
-                    <input type="text" defaultValue="Martín Pineda Design Studio" className="form-input" />
-                  </div>
                   <button type="submit" className="btn btn-primary">Guardar Cambios</button>
                 </form>
               </div>
@@ -384,6 +449,15 @@ export default function Dashboard() {
           )}
         </main>
       </div>
+
+      {/* ================= MODAL DETALLE DE PROYECTO ================= */}
+      {selectedProject && (
+        <ProjectDetailModal 
+          project={selectedProject} 
+          onClose={() => setSelectedProject(null)}
+          onUpdateProject={handleUpdateProject}
+        />
+      )}
 
       {/* ================= MODAL NUEVO PROYECTO ================= */}
       {isModalOpen && (
@@ -429,14 +503,16 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Fecha Límite</label>
-                  <input 
-                    type="text" 
-                    placeholder="30 Sep, 2026" 
-                    value={newProjectDeadline}
-                    onChange={(e) => setNewProjectDeadline(e.target.value)}
-                    className="form-input" 
-                  />
+                  <label>Prioridad</label>
+                  <select 
+                    value={newProjectPriority}
+                    onChange={(e) => setNewProjectPriority(e.target.value)}
+                    className="form-input"
+                  >
+                    <option value="Alta">Alta</option>
+                    <option value="Media">Media</option>
+                    <option value="Baja">Baja</option>
+                  </select>
                 </div>
               </div>
               <div className="modal-footer">
