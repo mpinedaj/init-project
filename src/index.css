@@ -3,14 +3,14 @@
    Dark Minimal Theme
    ============================================= */
 
-/* ---------- CSS Custom Properties ---------- */
-:root {
+/* ---------- CSS Custom Properties & Themes ---------- */
+:root, [data-theme="dark"] {
   /* Brand */
   --color-accent: #10B981;
   --color-accent-light: #34D399;
   --color-accent-dark: #059669;
-  --color-accent-subtle: rgba(16, 185, 129, 0.1);
-  --color-accent-border: rgba(16, 185, 129, 0.2);
+  --color-accent-subtle: rgba(16, 185, 129, 0.12);
+  --color-accent-border: rgba(16, 185, 129, 0.25);
 
   /* Backgrounds */
   --bg-base: #09090B;
@@ -18,6 +18,7 @@
   --bg-elevated: #18181B;
   --bg-hover: #1F1F23;
   --bg-active: #27272A;
+  --hero-bg-gradient: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
 
   /* Borders */
   --border-subtle: #1E1E22;
@@ -30,6 +31,44 @@
   --text-muted: #71717A;
   --text-faint: #52525B;
 
+  /* Shadows & Cards */
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --card-radius: 16px;
+}
+
+[data-theme="light"] {
+  /* Brand */
+  --color-accent: #059669;
+  --color-accent-light: #10B981;
+  --color-accent-dark: #047857;
+  --color-accent-subtle: rgba(16, 185, 129, 0.14);
+  --color-accent-border: rgba(16, 185, 129, 0.35);
+
+  /* Aetherfield Light Backgrounds & Gradients */
+  --bg-base: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  --bg-hover: #E2E8F0;
+  --bg-active: #CBD5E1;
+  --hero-bg-gradient: linear-gradient(180deg, #D4E6F7 0%, #EBF3FC 50%, #F8FAFC 100%);
+
+  /* Borders */
+  --border-subtle: #E2E8F0;
+  --border-default: #CBD5E1;
+  --border-hover: #94A3B8;
+
+  /* High Contrast Typography */
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
+
+  /* Shadows & Cards */
+  --shadow-card: 0 10px 30px rgba(15, 23, 42, 0.05);
+  --card-radius: 20px;
+}
+
+:root {
   /* Typography */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -180,6 +219,32 @@ button {
   gap: var(--sp-3);
 }
 
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-out);
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-elevated);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-text {
+  font-size: 11px;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
@@ -240,6 +305,8 @@ button {
   padding: var(--sp-24) var(--sp-6) var(--sp-16);
   text-align: center;
   position: relative;
+  background: var(--hero-bg-gradient);
+  transition: background 0.4s var(--ease-out);
 }
 
 .hero::before {
@@ -248,9 +315,9 @@ button {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(ellipse, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
+  width: 800px;
+  height: 500px;
+  background: var(--hero-bg-gradient);
   pointer-events: none;
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ThemeToggle from '../components/ThemeToggle'
 
 /* ---- SVG Icon Components ---- */
 const Icons = {
@@ -181,6 +182,7 @@ export default function Landing() {
             <a href="#faq" id="nav-faq">FAQ</a>
           </div>
           <div className="navbar-actions">
+            <ThemeToggle />
             <button className="btn btn-ghost" id="btn-login" onClick={() => navigate('/dashboard')}>
               Iniciar sesión
             </button>
