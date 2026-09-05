@@ -1,5 +1,5 @@
 -- ============================================================
--- Konta — Esquema inicial
+-- Chrono — Esquema inicial
 -- Crea las tablas y habilita Row Level Security (RLS)
 -- ============================================================
 
@@ -10,6 +10,7 @@ create table if not exists public.clients (
   name text not null,
   contact text not null default '',
   email text not null default '',
+  color text,
   total_billed numeric not null default 0,
   created_at timestamptz not null default now()
 );
@@ -23,6 +24,7 @@ create table if not exists public.projects (
   client_name text not null default '',
   status text not null default 'Pendiente',
   priority text not null default 'Media',
+  color text,
   budget numeric not null default 0,
   deadline text not null default '',
   hours_tracked bigint not null default 0,

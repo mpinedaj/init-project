@@ -6,7 +6,7 @@ export const seedClients: Client[] = [
   { id: 1, name: 'Estudio Nortex', contact: 'Laura García', email: 'laura@nortex.studio', totalBilled: 8400 },
   { id: 2, name: 'Vela Studio', contact: 'Carlos Ruiz', email: 'carlos@vela.studio', totalBilled: 6200 },
   { id: 3, name: 'Café Andino', contact: 'Elena Rostova', email: 'elena@cafeandino.co', totalBilled: 4500 },
-  { id: 4, name: 'Otros clientes', contact: 'Varios', email: 'hola@konta.app', totalBilled: 3800 },
+  { id: 4, name: 'Otros clientes', contact: 'Varios', email: 'hola@chrono.app', totalBilled: 3800 },
 ]
 
 export const seedProjects: Project[] = [
@@ -17,6 +17,7 @@ export const seedProjects: Project[] = [
     clientName: 'Estudio Nortex',
     status: 'Pendiente',
     priority: 'Alta',
+    color: 'violet',
     budget: 3200,
     deadline: '15 Sep, 2026',
     hoursTracked: 14400,
@@ -60,6 +61,7 @@ export const seedProjects: Project[] = [
     clientName: 'Vela Studio',
     status: 'En Progreso',
     priority: 'Alta',
+    color: 'blue',
     budget: 6800,
     deadline: '28 Sep, 2026',
     hoursTracked: 43200,
@@ -106,6 +108,7 @@ export const seedProjects: Project[] = [
     clientName: 'Café Andino',
     status: 'En Revisión',
     priority: 'Media',
+    color: 'pink',
     budget: 2400,
     deadline: '10 Sep, 2026',
     hoursTracked: 28800,

@@ -3,10 +3,13 @@ export type Priority = 'Alta' | 'Media' | 'Baja'
 export type InvoiceStatus = 'Pendiente' | 'Pagada'
 export type ViewMode = 'kanban' | 'table'
 
+export type TagColor = 'red' | 'orange' | 'amber' | 'lime' | 'green' | 'teal' | 'cyan' | 'blue' | 'violet' | 'pink'
+
 export interface Task {
   id: number
   text: string
   done: boolean
+  color?: TagColor
 }
 
 export interface Project {
@@ -16,6 +19,7 @@ export interface Project {
   clientName: string
   status: ProjectStatus
   priority: Priority
+  color?: TagColor
   budget: number
   deadline: string
   hoursTracked: number // segundos
@@ -29,6 +33,7 @@ export interface Client {
   name: string
   contact: string
   email: string
+  color?: TagColor
   totalBilled: number
 }
 

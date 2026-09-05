@@ -105,7 +105,7 @@ const features: Feature[] = [
 
 const testimonials: Testimonial[] = [
   {
-    quote: 'Konta cambió por completo cómo organizo mis proyectos de desarrollo. Antes perdía facturas y entregas, ahora todo está a 1 clic.',
+    quote: 'Chrono cambió por completo cómo organizo mis proyectos de desarrollo. Antes perdía facturas y entregas, ahora todo está a 1 clic.',
     author: 'Sebastián Morales',
     role: 'Fullstack Developer',
     avatar: 'SM',
@@ -126,7 +126,7 @@ const testimonials: Testimonial[] = [
 
 const faqs: Faq[] = [
   {
-    question: '¿Konta es realmente gratis para empezar?',
+    question: '¿Chrono es realmente gratis para empezar?',
     answer: 'Sí. El plan Free te permite gestionar hasta 3 clientes y proyectos activos de forma indefinida sin necesidad de ingresar tarjeta de crédito.',
   },
   {
@@ -139,7 +139,7 @@ const faqs: Faq[] = [
   },
   {
     question: '¿Cómo funciona la integración con la nube?',
-    answer: 'Konta sincroniza automáticamente tus datos entre tus dispositivos (laptop, tablet o móvil) para que siempre tengas la información actualizada.',
+    answer: 'Chrono sincroniza automáticamente tus datos entre tus dispositivos (laptop, tablet o móvil) para que siempre tengas la información actualizada.',
   },
 ]
 
@@ -191,8 +191,8 @@ export default function Landing() {
       <nav className="navbar" id="navbar">
         <div className="navbar-inner">
           <a href="#" className="navbar-logo" id="navbar-logo">
-            <div className="logo-mark">K</div>
-            Konta
+            <div className="logo-mark">C</div>
+            Chrono
           </a>
           <div className="navbar-links font-mono">
             <a href="#hero" id="nav-product">Producto</a>
@@ -369,7 +369,7 @@ export default function Landing() {
             <span className="sans-title">amado por freelancers</span>
           </h2>
           <p className="section-subtitle">
-            Descubre por qué cientos de freelancers gestionan su negocio con Konta.
+            Descubre por qué cientos de freelancers gestionan su negocio con Chrono.
           </p>
         </div>
 
@@ -490,7 +490,7 @@ export default function Landing() {
             <span className="serif-title">¿Listo para tomar el control?</span>
           </h2>
           <p>
-            Únete a miles de freelancers que ya organizan su trabajo con Konta.
+            Únete a miles de freelancers que ya organizan su trabajo con Chrono.
             Sin tarjeta de crédito.
           </p>
           <button className="btn-mono-pill" id="cta-final" onClick={() => navigate('/register')}>
@@ -503,8 +503,8 @@ export default function Landing() {
       <footer className="footer" id="footer">
         <div className="footer-inner">
           <div className="footer-brand font-sans">
-            <div className="logo-mark-sm">K</div>
-            Konta
+            <div className="logo-mark-sm">C</div>
+            Chrono
           </div>
           <div className="footer-links font-mono">
             <a href="#hero">Producto</a>
@@ -513,7 +513,7 @@ export default function Landing() {
             <a href="#faq">FAQ</a>
           </div>
           <div className="footer-copy font-mono">
-            © {new Date().getFullYear()} Konta Inc.
+            © {new Date().getFullYear()} Chrono Inc.
           </div>
         </div>
       </footer>

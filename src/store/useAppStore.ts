@@ -119,6 +119,7 @@ export const useAppStore = create<AppState>()(
           clientName: client?.name || 'Sin cliente',
           status: 'Pendiente',
           priority: input.priority,
+          color: client?.color,
           budget: input.budget,
           deadline: input.deadline,
           hoursTracked: 0,
@@ -252,7 +253,7 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: 'konta-storage',
+      name: 'chrono-storage',
       partialize: (state) => ({
         projects: state.projects,
         clients: state.clients,

@@ -41,8 +41,8 @@ export default function Login() {
     <div className="auth-layout">
       <div className="auth-card">
         <Link to="/" className="auth-logo">
-          <div className="logo-mark">K</div>
-          Konta
+          <div className="logo-mark">C</div>
+          Chrono
         </Link>
         <h1 className="auth-title">Iniciar sesión</h1>
         <p className="auth-subtitle">Bienvenido de nuevo. Gestiona tu negocio freelance.</p>
