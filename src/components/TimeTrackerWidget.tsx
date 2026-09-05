@@ -1,28 +1,30 @@
 import { useState, useEffect } from 'react'
+import type { Project } from '../types'
+import { useAppStore } from '../store/useAppStore'
+import { formatDuration } from '../lib/format'
 
-export default function TimeTrackerWidget({ projects, onSaveTime }) {
+interface TimeTrackerWidgetProps {
+  projects: Project[]
+}
+
+export default function TimeTrackerWidget({ projects }: TimeTrackerWidgetProps) {
   const [seconds, setSeconds] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
-  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || '')
+  const [selectedProjectId, setSelectedProjectId] = useState<number>(projects[0]?.id || 0)
+  const addTimeToProject = useAppStore((s) => s.addTimeToProject)
+  const showToast = useAppStore((s) => s.showToast)
 
   useEffect(() => {
-    let interval = null
+    let interval: ReturnType<typeof setInterval> | null = null
     if (isRunning) {
       interval = setInterval(() => {
         setSeconds((prev) => prev + 1)
       }, 1000)
-    } else {
-      clearInterval(interval)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) clearInterval(interval)
+    }
   }, [isRunning])
-
-  const formatTime = (totalSeconds) => {
-    const hrs = Math.floor(totalSeconds / 3600)
-    const mins = Math.floor((totalSeconds % 3600) / 60)
-    const secs = totalSeconds % 60
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
 
   const handleToggleTimer = () => {
     setIsRunning(!isRunning)
@@ -31,9 +33,10 @@ export default function TimeTrackerWidget({ projects, onSaveTime }) {
   const handleSave = () => {
     if (seconds === 0) return
     setIsRunning(false)
-    const project = projects.find(p => p.id === Number(selectedProjectId))
-    if (onSaveTime && project) {
-      onSaveTime(project.id, seconds)
+    if (selectedProjectId) {
+      addTimeToProject(selectedProjectId, seconds)
+      const project = projects.find((p) => p.id === selectedProjectId)
+      showToast(`Tiempo guardado en "${project?.title || 'proyecto'}" ✓`)
     }
     setSeconds(0)
   }
@@ -41,15 +44,15 @@ export default function TimeTrackerWidget({ projects, onSaveTime }) {
   return (
     <div className={`time-tracker-widget ${isRunning ? 'running' : ''}`} id="timer-widget">
       <div className="tracker-select-wrapper">
-        <select 
-          value={selectedProjectId} 
-          onChange={(e) => setSelectedProjectId(e.target.value)}
+        <select
+          value={selectedProjectId}
+          onChange={(e) => setSelectedProjectId(Number(e.target.value))}
           className="tracker-select"
           disabled={isRunning}
         >
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.title} ({p.client})
+              {p.title} ({p.clientName})
             </option>
           ))}
         </select>
@@ -57,11 +60,11 @@ export default function TimeTrackerWidget({ projects, onSaveTime }) {
 
       <div className="tracker-timer-display font-mono">
         <span className={`timer-dot ${isRunning ? 'pulsing' : ''}`}></span>
-        {formatTime(seconds)}
+        {formatDuration(seconds)}
       </div>
 
       <div className="tracker-controls">
-        <button 
+        <button
           className={`btn-timer-toggle ${isRunning ? 'pause' : 'play'}`}
           onClick={handleToggleTimer}
           title={isRunning ? 'Pausar tiempo' : 'Iniciar tiempo'}
@@ -74,7 +77,7 @@ export default function TimeTrackerWidget({ projects, onSaveTime }) {
         </button>
 
         {seconds > 0 && (
-          <button 
+          <button
             className="btn-timer-save"
             onClick={handleSave}
             title="Guardar horas"
