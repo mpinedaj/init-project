@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<string>(() => {
-    return localStorage.getItem('konta-theme') || 'dark'
+    return localStorage.getItem('chrono-theme') || 'dark'
   })
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('konta-theme', theme)
+    localStorage.setItem('chrono-theme', theme)
   }, [theme])
 
   const toggleTheme = () => {

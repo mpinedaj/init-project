@@ -49,8 +49,8 @@ export default function Register() {
     <div className="auth-layout">
       <div className="auth-card">
         <Link to="/" className="auth-logo">
-          <div className="logo-mark">K</div>
-          Konta
+          <div className="logo-mark">C</div>
+          Chrono
         </Link>
         <h1 className="auth-title">Crear cuenta</h1>
         <p className="auth-subtitle">Empieza a gestionar tu negocio freelance hoy.</p>

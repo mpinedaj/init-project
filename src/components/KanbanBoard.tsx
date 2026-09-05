@@ -1,6 +1,7 @@
 import type { ProjectStatus, Project } from '../types'
 import { useAppStore } from '../store/useAppStore'
 import { formatHours } from '../lib/format'
+import { getTagHex } from '../lib/colors'
 
 interface Column {
   id: ProjectStatus
@@ -61,9 +62,15 @@ export default function KanbanBoard({ projects }: KanbanBoardProps) {
                       key={p.id}
                       className="kanban-card"
                       onClick={() => setSelectedProjectId(p.id)}
+                      style={p.color ? { borderLeft: `3px solid ${getTagHex(p.color)}` } : undefined}
                     >
                       <div className="kanban-card-top">
-                        <span className="kanban-card-client">{p.clientName}</span>
+                        <span className="kanban-card-client">
+                          {p.color && (
+                            <span className="kanban-color-dot" style={{ backgroundColor: getTagHex(p.color) }} />
+                          )}
+                          {p.clientName}
+                        </span>
                         <span className={`priority-badge ${p.priority.toLowerCase()}`}>
                           {p.priority}
                         </span>

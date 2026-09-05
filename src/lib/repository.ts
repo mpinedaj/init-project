@@ -19,6 +19,7 @@ function mapProject(row: Record<string, unknown>): Project {
     clientName: String(row.client_name ?? ''),
     status: (row.status as Project['status']) ?? 'Pendiente',
     priority: (row.priority as Project['priority']) ?? 'Media',
+    color: (row.color as Project['color']) ?? undefined,
     budget: Number(row.budget ?? 0),
     deadline: String(row.deadline ?? ''),
     hoursTracked: Number(row.hours_tracked ?? 0),
@@ -34,6 +35,7 @@ function mapClient(row: Record<string, unknown>): Client {
     name: String(row.name ?? ''),
     contact: String(row.contact ?? ''),
     email: String(row.email ?? ''),
+    color: (row.color as Client['color']) ?? undefined,
     totalBilled: Number(row.total_billed ?? 0),
   }
 }
@@ -76,6 +78,7 @@ export async function insertClient(client: Client): Promise<void> {
     name: client.name,
     contact: client.contact,
     email: client.email,
+    color: client.color ?? null,
     total_billed: client.totalBilled,
   })
   if (error) throw error
@@ -84,7 +87,7 @@ export async function insertClient(client: Client): Promise<void> {
 export async function updateClientRecord(client: Client): Promise<void> {
   const { error } = await supabase
     .from('clients')
-    .update({ name: client.name, contact: client.contact, email: client.email, total_billed: client.totalBilled })
+    .update({ name: client.name, contact: client.contact, email: client.email, color: client.color ?? null, total_billed: client.totalBilled })
     .eq('id', client.id)
   if (error) throw error
 }
@@ -112,6 +115,7 @@ export async function insertProject(project: Project): Promise<void> {
     client_name: project.clientName,
     status: project.status,
     priority: project.priority,
+    color: project.color ?? null,
     budget: project.budget,
     deadline: project.deadline,
     hours_tracked: project.hoursTracked,
@@ -130,6 +134,7 @@ export async function updateProjectRecord(project: Project): Promise<void> {
       client_name: project.clientName,
       status: project.status,
       priority: project.priority,
+      color: project.color ?? null,
       budget: project.budget,
       deadline: project.deadline,
       hours_tracked: project.hoursTracked,

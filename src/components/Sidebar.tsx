@@ -65,8 +65,8 @@ export default function Sidebar() {
     <aside className="sidebar" id="dashboard-sidebar">
       <div className="sidebar-header">
         <Link to="/" className="sidebar-logo">
-          <div className="logo-mark">K</div>
-          <span>Konta</span>
+          <div className="logo-mark">C</div>
+          <span>Chrono</span>
         </Link>
         <span className="sidebar-version">v1.0</span>
       </div>
