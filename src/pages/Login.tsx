@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import { translateAuthError } from '../lib/authErrors'
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -26,11 +27,14 @@ export default function Login() {
     defaultValues: { email: '', password: '' },
   })
 
-  const onSubmit = (data: LoginForm) => {
+  const onSubmit = async (data: LoginForm) => {
     setError(null)
-    // Mock: sin backend, acepta cualquier credencial válida por formato
-    login(data.email, data.password)
-    navigate('/dashboard')
+    try {
+      await login(data.email, data.password)
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? translateAuthError(err.message) : 'Error al iniciar sesión')
+    }
   }
 
   return (
