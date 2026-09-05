@@ -3,10 +3,14 @@ import { persist } from 'zustand/middleware'
 import type { Client, Invoice, Project, ProjectStatus, TimeEntry } from '../types'
 import { seedClients, seedInvoices, seedProjects } from '../lib/seed'
 import { generateInvoiceNumber } from '../lib/format'
+import * as repo from '../lib/repository'
 
 type TabId = 'overview' | 'projects' | 'clients' | 'invoices' | 'settings'
 type ViewMode = 'kanban' | 'table'
 type ModalName = 'newProject' | 'newClient' | 'newInvoice' | null
+
+// Estado de sincronización con backend
+type SyncStatus = 'idle' | 'loading' | 'synced' | 'error'
 
 interface AppState {
   projects: Project[]
@@ -20,6 +24,7 @@ interface AppState {
   toastMessage: string | null
   selectedProjectId: number | null
   openModal: ModalName
+  syncStatus: SyncStatus
 
   // UI actions
   setActiveTab: (tab: TabId) => void
@@ -29,6 +34,9 @@ interface AppState {
   clearToast: () => void
   setSelectedProjectId: (id: number | null) => void
   setOpenModal: (modal: ModalName) => void
+
+  // Data loading
+  loadFromSupabase: () => Promise<void>
 
   // Project actions
   addProject: (input: {
@@ -70,6 +78,7 @@ export const useAppStore = create<AppState>()(
       toastMessage: null,
       selectedProjectId: null,
       openModal: null,
+      syncStatus: 'idle',
 
       setActiveTab: (tab) => set({ activeTab: tab, searchQuery: '' }),
       setViewMode: (mode) => set({ viewMode: mode }),
@@ -78,6 +87,28 @@ export const useAppStore = create<AppState>()(
       clearToast: () => set({ toastMessage: null }),
       setSelectedProjectId: (id) => set({ selectedProjectId: id }),
       setOpenModal: (modal) => set({ openModal: modal }),
+
+      loadFromSupabase: async () => {
+        set({ syncStatus: 'loading' })
+        try {
+          const [projects, clients, invoices, timeEntries] = await Promise.all([
+            repo.fetchProjects(),
+            repo.fetchClients(),
+            repo.fetchInvoices(),
+            repo.fetchTimeEntries(),
+          ])
+          set({
+            projects: projects.length ? projects : seedProjects,
+            clients: clients.length ? clients : seedClients,
+            invoices: invoices.length ? invoices : seedInvoices,
+            timeEntries,
+            syncStatus: 'synced',
+          })
+        } catch (error) {
+          console.error('Error cargando datos desde Supabase:', error)
+          set({ syncStatus: 'error' })
+        }
+      },
 
       addProject: (input) => {
         const client = get().clients.find((c) => c.id === input.clientId)
@@ -99,55 +130,69 @@ export const useAppStore = create<AppState>()(
           ],
         }
         set({ projects: [newProject, ...get().projects] })
+        repo.insertProject(newProject).catch((e) => console.error('Error insertando proyecto:', e))
         return newProject
       },
 
-      updateProject: (project) =>
+      updateProject: (project) => {
         set({
           projects: get().projects.map((p) => (p.id === project.id ? project : p)),
-        }),
+        })
+        repo.updateProjectRecord(project).catch((e) => console.error('Error actualizando proyecto:', e))
+      },
 
-      moveProject: (projectId, status) =>
+      moveProject: (projectId, status) => {
+        const updated = get().projects.map((p) => (p.id === projectId ? { ...p, status } : p))
+        set({ projects: updated })
+        const project = updated.find((p) => p.id === projectId)
+        if (project) repo.updateProjectRecord(project).catch((e) => console.error('Error moviendo proyecto:', e))
+      },
+
+      deleteProject: (projectId) => {
+        set({ projects: get().projects.filter((p) => p.id !== projectId) })
+        repo.deleteProjectRecord(projectId).catch((e) => console.error('Error eliminando proyecto:', e))
+      },
+
+      toggleTask: (projectId, taskId) => {
+        const updated = get().projects.map((p) =>
+          p.id === projectId
+            ? { ...p, tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t)) }
+            : p,
+        )
+        set({ projects: updated })
+        const project = updated.find((p) => p.id === projectId)
+        if (project) repo.updateProjectRecord(project).catch((e) => console.error('Error actualizando tarea:', e))
+      },
+
+      addTask: (projectId, text) => {
+        const updated = get().projects.map((p) =>
+          p.id === projectId
+            ? { ...p, tasks: [...p.tasks, { id: Date.now(), text, done: false }] }
+            : p,
+        )
+        set({ projects: updated })
+        const project = updated.find((p) => p.id === projectId)
+        if (project) repo.updateProjectRecord(project).catch((e) => console.error('Error agregando tarea:', e))
+      },
+
+      addTimeToProject: (projectId, seconds) => {
+        const updated = get().projects.map((p) =>
+          p.id === projectId ? { ...p, hoursTracked: p.hoursTracked + seconds } : p,
+        )
+        const entry: TimeEntry = {
+          id: Date.now(),
+          projectId,
+          seconds,
+          date: new Date().toISOString(),
+        }
         set({
-          projects: get().projects.map((p) => (p.id === projectId ? { ...p, status } : p)),
-        }),
-
-      deleteProject: (projectId) =>
-        set({ projects: get().projects.filter((p) => p.id !== projectId) }),
-
-      toggleTask: (projectId, taskId) =>
-        set({
-          projects: get().projects.map((p) =>
-            p.id === projectId
-              ? { ...p, tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, done: !t.done } : t)) }
-              : p,
-          ),
-        }),
-
-      addTask: (projectId, text) =>
-        set({
-          projects: get().projects.map((p) =>
-            p.id === projectId
-              ? { ...p, tasks: [...p.tasks, { id: Date.now(), text, done: false }] }
-              : p,
-          ),
-        }),
-
-      addTimeToProject: (projectId, seconds) =>
-        set({
-          projects: get().projects.map((p) =>
-            p.id === projectId ? { ...p, hoursTracked: p.hoursTracked + seconds } : p,
-          ),
-          timeEntries: [
-            {
-              id: Date.now(),
-              projectId,
-              seconds,
-              date: new Date().toISOString(),
-            },
-            ...get().timeEntries,
-          ],
-        }),
+          projects: updated,
+          timeEntries: [entry, ...get().timeEntries],
+        })
+        const project = updated.find((p) => p.id === projectId)
+        if (project) repo.updateProjectRecord(project).catch((e) => console.error('Error guardando tiempo:', e))
+        repo.insertTimeEntry(entry).catch((e) => console.error('Error insertando time entry:', e))
+      },
 
       addClient: (input) => {
         const newClient: Client = {
@@ -158,14 +203,19 @@ export const useAppStore = create<AppState>()(
           totalBilled: 0,
         }
         set({ clients: [...get().clients, newClient] })
+        repo.insertClient(newClient).catch((e) => console.error('Error insertando cliente:', e))
         return newClient
       },
 
-      updateClient: (client) =>
-        set({ clients: get().clients.map((c) => (c.id === client.id ? client : c)) }),
+      updateClient: (client) => {
+        set({ clients: get().clients.map((c) => (c.id === client.id ? client : c)) })
+        repo.updateClientRecord(client).catch((e) => console.error('Error actualizando cliente:', e))
+      },
 
-      deleteClient: (clientId) =>
-        set({ clients: get().clients.filter((c) => c.id !== clientId) }),
+      deleteClient: (clientId) => {
+        set({ clients: get().clients.filter((c) => c.id !== clientId) })
+        repo.deleteClientRecord(clientId).catch((e) => console.error('Error eliminando cliente:', e))
+      },
 
       addInvoice: (input) => {
         const client = get().clients.find((c) => c.id === input.clientId)
@@ -181,18 +231,25 @@ export const useAppStore = create<AppState>()(
           status: 'Pendiente',
         }
         set({ invoices: [newInvoice, ...get().invoices] })
+        repo.insertInvoice(newInvoice).catch((e) => console.error('Error insertando factura:', e))
         return newInvoice
       },
 
-      markInvoicePaid: (invoiceId, paid) =>
-        set({
-          invoices: get().invoices.map((i) =>
-            i.id === invoiceId ? { ...i, status: paid ? 'Pagada' : 'Pendiente' } : i,
-          ),
-        }),
+      markInvoicePaid: (invoiceId, paid) => {
+        const updated = get().invoices.map((i) =>
+          i.id === invoiceId
+            ? { ...i, status: (paid ? 'Pagada' : 'Pendiente') as Invoice['status'] }
+            : i,
+        )
+        set({ invoices: updated })
+        const invoice = updated.find((i) => i.id === invoiceId)
+        if (invoice) repo.updateInvoiceRecord(invoice).catch((e) => console.error('Error actualizando factura:', e))
+      },
 
-      deleteInvoice: (invoiceId) =>
-        set({ invoices: get().invoices.filter((i) => i.id !== invoiceId) }),
+      deleteInvoice: (invoiceId) => {
+        set({ invoices: get().invoices.filter((i) => i.id !== invoiceId) })
+        repo.deleteInvoiceRecord(invoiceId).catch((e) => console.error('Error eliminando factura:', e))
+      },
     }),
     {
       name: 'konta-storage',

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import Sidebar from '../components/Sidebar'
 import Topbar from '../components/Topbar'
 import StatCard from '../components/StatCard'
@@ -35,6 +35,12 @@ export default function Dashboard() {
   const deleteInvoice = useAppStore((s) => s.deleteInvoice)
   const deleteClient = useAppStore((s) => s.deleteClient)
   const showToast = useAppStore((s) => s.showToast)
+  const loadFromSupabase = useAppStore((s) => s.loadFromSupabase)
+  const syncStatus = useAppStore((s) => s.syncStatus)
+
+  useEffect(() => {
+    loadFromSupabase()
+  }, [loadFromSupabase])
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId) || null
 

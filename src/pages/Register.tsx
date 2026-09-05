@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import { translateAuthError } from '../lib/authErrors'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Mínimo 2 caracteres'),
@@ -17,6 +18,7 @@ export default function Register() {
   const navigate = useNavigate()
   const register = useAuthStore((s) => s.register)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
 
   const {
     register: registerField,
@@ -27,10 +29,20 @@ export default function Register() {
     defaultValues: { name: '', email: '', password: '' },
   })
 
-  const onSubmit = (data: RegisterForm) => {
+  const onSubmit = async (data: RegisterForm) => {
     setError(null)
-    register(data.name, data.email, data.password)
-    navigate('/dashboard')
+    setInfo(null)
+    try {
+      await register(data.name, data.email, data.password)
+      const { isAuthenticated } = useAuthStore.getState()
+      if (isAuthenticated) {
+        navigate('/dashboard')
+      } else {
+        setInfo('Revisa tu correo para confirmar la cuenta. Luego inicia sesión.')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? translateAuthError(err.message) : 'Error al crear la cuenta')
+    }
   }
 
   return (
@@ -44,6 +56,7 @@ export default function Register() {
         <p className="auth-subtitle">Empieza a gestionar tu negocio freelance hoy.</p>
 
         {error && <div className="auth-error">{error}</div>}
+        {info && <div className="auth-info">{info}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="form-group">

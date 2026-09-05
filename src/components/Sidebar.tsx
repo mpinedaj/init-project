@@ -53,9 +53,13 @@ export default function Sidebar() {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
 
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase()
-    : 'MP'
+  const displayName = (user?.user_metadata?.full_name as string | undefined) || user?.email || 'Martín Pineda'
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
 
   return (
     <aside className="sidebar" id="dashboard-sidebar">
@@ -94,7 +98,7 @@ export default function Sidebar() {
         <div className="user-profile">
           <div className="avatar">{initials}</div>
           <div className="user-info">
-            <div className="user-name">{user?.name || 'Martín Pineda'}</div>
+            <div className="user-name">{displayName}</div>
             <div className="user-plan">Plan Freelance</div>
           </div>
           <button className="logout-btn" onClick={logout} title="Cerrar sesión">
