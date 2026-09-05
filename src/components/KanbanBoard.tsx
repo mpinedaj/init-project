@@ -1,27 +1,42 @@
-const columns = [
+import type { ProjectStatus, Project } from '../types'
+import { useAppStore } from '../store/useAppStore'
+import { formatHours } from '../lib/format'
+
+interface Column {
+  id: ProjectStatus
+  label: string
+  color: string
+}
+
+const columns: Column[] = [
   { id: 'Pendiente', label: 'Por Hacer', color: '#EF4444' },
   { id: 'En Progreso', label: 'En Progreso', color: '#3B82F6' },
   { id: 'En Revisión', label: 'En Revisión', color: '#F59E0B' },
-  { id: 'Completado', label: 'Completado', color: '#10B981' }
+  { id: 'Completado', label: 'Completado', color: '#10B981' },
 ]
 
-export default function KanbanBoard({ projects, onMoveProject, onSelectProject }) {
-  const getNextStatus = (currentStatus, direction) => {
-    const statusOrder = ['Pendiente', 'En Progreso', 'En Revisión', 'Completado']
-    const index = statusOrder.indexOf(currentStatus)
-    if (direction === 'next' && index < statusOrder.length - 1) {
-      return statusOrder[index + 1]
-    }
-    if (direction === 'prev' && index > 0) {
-      return statusOrder[index - 1]
-    }
-    return currentStatus
-  }
+const statusOrder: ProjectStatus[] = ['Pendiente', 'En Progreso', 'En Revisión', 'Completado']
+
+function getNextStatus(current: ProjectStatus, direction: 'next' | 'prev'): ProjectStatus {
+  const index = statusOrder.indexOf(current)
+  if (direction === 'next' && index < statusOrder.length - 1) return statusOrder[index + 1]
+  if (direction === 'prev' && index > 0) return statusOrder[index - 1]
+  return current
+}
+
+interface KanbanBoardProps {
+  projects: Project[]
+}
+
+export default function KanbanBoard({ projects }: KanbanBoardProps) {
+  const moveProject = useAppStore((s) => s.moveProject)
+  const setSelectedProjectId = useAppStore((s) => s.setSelectedProjectId)
+  const showToast = useAppStore((s) => s.showToast)
 
   return (
     <div className="kanban-board" id="kanban-board-wrapper">
       {columns.map((col) => {
-        const colProjects = projects.filter((p) => (p.status || 'Pendiente') === col.id)
+        const colProjects = projects.filter((p) => p.status === col.id)
         return (
           <div key={col.id} className="kanban-column" id={`kanban-col-${col.id.toLowerCase().replace(' ', '-')}`}>
             <div className="kanban-column-header">
@@ -34,25 +49,23 @@ export default function KanbanBoard({ projects, onMoveProject, onSelectProject }
 
             <div className="kanban-column-content">
               {colProjects.length === 0 ? (
-                <div className="kanban-empty-state">
-                  Sin proyectos
-                </div>
+                <div className="kanban-empty-state">Sin proyectos</div>
               ) : (
                 colProjects.map((p) => {
-                  const tasksDone = p.tasks ? p.tasks.filter(t => t.done).length : 2
-                  const tasksTotal = p.tasks ? p.tasks.length : 4
-                  const progressPct = Math.round((tasksDone / tasksTotal) * 100)
+                  const tasksDone = p.tasks.filter((t) => t.done).length
+                  const tasksTotal = p.tasks.length
+                  const progressPct = tasksTotal > 0 ? Math.round((tasksDone / tasksTotal) * 100) : 0
 
                   return (
-                    <div 
-                      key={p.id} 
+                    <div
+                      key={p.id}
                       className="kanban-card"
-                      onClick={() => onSelectProject && onSelectProject(p)}
+                      onClick={() => setSelectedProjectId(p.id)}
                     >
                       <div className="kanban-card-top">
-                        <span className="kanban-card-client">{p.client}</span>
-                        <span className={`priority-badge ${(p.priority || 'Media').toLowerCase()}`}>
-                          {p.priority || 'Media'}
+                        <span className="kanban-card-client">{p.clientName}</span>
+                        <span className={`priority-badge ${p.priority.toLowerCase()}`}>
+                          {p.priority}
                         </span>
                       </div>
 
@@ -70,29 +83,31 @@ export default function KanbanBoard({ projects, onMoveProject, onSelectProject }
 
                       <div className="kanban-card-footer">
                         <div className="kanban-card-meta">
-                          <span className="kanban-meta-item">
-                            ⏱ {p.hoursTracked ? `${(p.hoursTracked / 3600).toFixed(1)}h` : '0h'}
-                          </span>
-                          <span className="kanban-meta-item font-semibold">
-                            {p.budget}
-                          </span>
+                          <span className="kanban-meta-item">⏱ {formatHours(p.hoursTracked)}h</span>
+                          <span className="kanban-meta-item font-semibold">${p.budget.toLocaleString()}</span>
                         </div>
 
                         <div className="kanban-card-actions" onClick={(e) => e.stopPropagation()}>
                           {col.id !== 'Pendiente' && (
-                            <button 
+                            <button
                               className="kanban-btn-move"
                               title="Mover a la izquierda"
-                              onClick={() => onMoveProject(p.id, getNextStatus(p.status, 'prev'))}
+                              onClick={() => {
+                                moveProject(p.id, getNextStatus(p.status, 'prev'))
+                                showToast(`Proyecto "${p.title}" movido a ${getNextStatus(p.status, 'prev')}`)
+                              }}
                             >
                               ←
                             </button>
                           )}
                           {col.id !== 'Completado' && (
-                            <button 
+                            <button
                               className="kanban-btn-move"
                               title="Mover a la derecha"
-                              onClick={() => onMoveProject(p.id, getNextStatus(p.status, 'next'))}
+                              onClick={() => {
+                                moveProject(p.id, getNextStatus(p.status, 'next'))
+                                showToast(`Proyecto "${p.title}" movido a ${getNextStatus(p.status, 'next')}`)
+                              }}
                             >
                               →
                             </button>

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ThemeToggle from '../components/ThemeToggle'
+import type { ReactElement } from 'react'
 
 /* ---- SVG Icon Components ---- */
-const Icons = {
+const Icons: Record<string, ReactElement> = {
   users: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -51,7 +52,25 @@ const Icons = {
   ),
 }
 
-const features = [
+interface Feature {
+  icon: ReactElement
+  title: string
+  description: string
+}
+
+interface Testimonial {
+  quote: string
+  author: string
+  role: string
+  avatar: string
+}
+
+interface Faq {
+  question: string
+  answer: string
+}
+
+const features: Feature[] = [
   {
     icon: Icons.users,
     title: 'Gestión de clientes',
@@ -84,44 +103,44 @@ const features = [
   },
 ]
 
-const testimonials = [
+const testimonials: Testimonial[] = [
   {
     quote: 'Konta cambió por completo cómo organizo mis proyectos de desarrollo. Antes perdía facturas y entregas, ahora todo está a 1 clic.',
     author: 'Sebastián Morales',
     role: 'Fullstack Developer',
-    avatar: 'SM'
+    avatar: 'SM',
   },
   {
     quote: 'El tablero Kanban y la vista de ingresos del mes me dan la tranquilidad que necesitaba para enfocarme en diseñar.',
     author: 'Camila Torres',
     role: 'UI/UX Designer',
-    avatar: 'CT'
+    avatar: 'CT',
   },
   {
     quote: 'La simplicidad y el tema oscuro son increíbles. Es la única herramienta freelance que no me da pereza usar todos los días.',
     author: 'Daniel Rivas',
     role: 'Consultor SEO & Growth',
-    avatar: 'DR'
-  }
+    avatar: 'DR',
+  },
 ]
 
-const faqs = [
+const faqs: Faq[] = [
   {
     question: '¿Konta es realmente gratis para empezar?',
-    answer: 'Sí. El plan Free te permite gestionar hasta 3 clientes y proyectos activos de forma indefinida sin necesidad de ingresar tarjeta de crédito.'
+    answer: 'Sí. El plan Free te permite gestionar hasta 3 clientes y proyectos activos de forma indefinida sin necesidad de ingresar tarjeta de crédito.',
   },
   {
     question: '¿Mis datos están seguros?',
-    answer: 'Absolutamente. Utilizamos almacenamiento cifrado en la nube y conexiones seguras SSL de 256 bits para garantizar la privacidad de tus clientes y montos.'
+    answer: 'Absolutamente. Utilizamos almacenamiento cifrado en la nube y conexiones seguras SSL de 256 bits para garantizar la privacidad de tus clientes y montos.',
   },
   {
     question: '¿Puedo exportar mis facturas y proyectos?',
-    answer: 'Sí, todas tus facturas y reportes se pueden descargar o imprimir directamente en PDF con un formato profesional adaptado a tu marca.'
+    answer: 'Sí, todas tus facturas y reportes se pueden descargar o imprimir directamente en PDF con un formato profesional adaptado a tu marca.',
   },
   {
     question: '¿Cómo funciona la integración con la nube?',
-    answer: 'Konta sincroniza automáticamente tus datos entre tus dispositivos (laptop, tablet o móvil) para que siempre tengas la información actualizada.'
-  }
+    answer: 'Konta sincroniza automáticamente tus datos entre tus dispositivos (laptop, tablet o móvil) para que siempre tengas la información actualizada.',
+  },
 ]
 
 const freePlan = [
@@ -143,9 +162,9 @@ const proPlan = [
 
 export default function Landing() {
   const navigate = useNavigate()
-  const observerRef = useRef(null)
-  const [openFaq, setOpenFaq] = useState(null)
-  const [previewTab, setPreviewTab] = useState('kanban')
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [heroCardTab, setHeroCardTab] = useState<'kanban' | 'stats' | 'invoices'>('kanban')
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -156,11 +175,11 @@ export default function Landing() {
           }
         })
       },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
     )
 
     document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observerRef.current.observe(el)
+      observerRef.current?.observe(el)
     })
 
     return () => observerRef.current?.disconnect()
@@ -175,19 +194,19 @@ export default function Landing() {
             <div className="logo-mark">K</div>
             Konta
           </a>
-          <div className="navbar-links">
-            <a href="#demo" id="nav-demo">Demo</a>
+          <div className="navbar-links font-mono">
+            <a href="#hero" id="nav-product">Producto</a>
             <a href="#features" id="nav-features">Funcionalidades</a>
             <a href="#pricing" id="nav-pricing">Precios</a>
             <a href="#faq" id="nav-faq">FAQ</a>
           </div>
           <div className="navbar-actions">
             <ThemeToggle />
-            <button className="btn btn-ghost" id="btn-login" onClick={() => navigate('/dashboard')}>
-              Iniciar sesión
+            <button className="btn-mono-pill outline" id="btn-login" onClick={() => navigate('/login')}>
+              • Iniciar sesión
             </button>
-            <button className="btn btn-primary" id="btn-signup" onClick={() => navigate('/dashboard')}>
-              Empieza gratis
+            <button className="btn-mono-pill" id="btn-signup" onClick={() => navigate('/register')}>
+              • Empieza gratis →
             </button>
           </div>
         </div>
@@ -195,168 +214,124 @@ export default function Landing() {
 
       {/* ===== HERO ===== */}
       <section className="hero" id="hero">
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span className="indicator"></span>
-            Disponible ahora — gratis para empezar
-          </div>
-
-          <h1>
-            Tu negocio freelance,<br />
-            <span className="accent">bajo control total</span>
-          </h1>
-
-          <p className="hero-description">
-            Clientes, proyectos y facturación en una sola plataforma.
-            Diseñada para que te enfoques en lo que importa.
-          </p>
-
-          <div className="hero-actions">
-            <button className="btn btn-primary btn-lg" id="hero-cta-primary" onClick={() => navigate('/dashboard')}>
-              Comenzar gratis {Icons.arrow}
-            </button>
-            <button className="btn btn-outline btn-lg" id="hero-cta-secondary" onClick={() => navigate('/dashboard')}>
-              Ver demo interactiva
-            </button>
-          </div>
-
-          <div className="hero-metrics">
-            <div className="metric">
-              <div className="metric-value">2,400+</div>
-              <div className="metric-label">Freelancers activos</div>
+        <div className="hero-content-wrapper">
+          <div className="hero-header-text">
+            <div className="hero-badge font-mono">
+              <span className="indicator"></span>
+              Plataforma de gestión freelance v1.0
             </div>
-            <div className="metric">
-              <div className="metric-value">$1.2M</div>
-              <div className="metric-label">Facturado</div>
-            </div>
-            <div className="metric">
-              <div className="metric-value">99.9%</div>
-              <div className="metric-label">Uptime</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ===== DEMO SHOWCASE INTERACTIVO ===== */}
-      <section className="section showcase-section" id="demo">
-        <div className="section-header animate-on-scroll">
-          <span className="section-label">Experiencia en vivo</span>
-          <h2 className="section-title">Diseñado para la velocidad</h2>
-          <p className="section-subtitle">
-            Explora la interfaz de Konta sin rodeos. Cambia entre pestañas para ver cómo organizamos tu trabajo.
-          </p>
-        </div>
+            <h1 className="hero-title-editorial">
+              <span className="serif-title">Gestión inteligente,</span>
+              <span className="sans-title">diseñada para freelancers</span>
+            </h1>
 
-        <div className="showcase-container animate-on-scroll">
-          <div className="showcase-header">
-            <div className="showcase-dots">
-              <span className="dot red"></span>
-              <span className="dot yellow"></span>
-              <span className="dot green"></span>
-            </div>
-            <div className="showcase-tabs">
-              <button 
-                className={`showcase-tab ${previewTab === 'kanban' ? 'active' : ''}`}
-                onClick={() => setPreviewTab('kanban')}
-              >
-                Kanban de Proyectos
+            <p className="hero-subtitle-editorial">
+              Organiza tus proyectos, gestiona tus clientes y automatiza tu facturación — con total claridad y confianza.
+            </p>
+
+            <div className="hero-actions-pills">
+              <button className="btn-mono-pill" id="hero-cta-primary" onClick={() => navigate('/register')}>
+                • Solicitar demo
               </button>
-              <button 
-                className={`showcase-tab ${previewTab === 'stats' ? 'active' : ''}`}
-                onClick={() => setPreviewTab('stats')}
-              >
-                Métricas & Ingresos
-              </button>
-              <button 
-                className={`showcase-tab ${previewTab === 'invoices' ? 'active' : ''}`}
-                onClick={() => setPreviewTab('invoices')}
-              >
-                Facturación
+              <button className="btn-mono-pill outline" id="hero-cta-secondary" onClick={() => navigate('/login')}>
+                • Explorar plataforma →
               </button>
             </div>
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/dashboard')}>
-              Abrir Dashboard →
-            </button>
           </div>
 
-          <div className="showcase-body">
-            {previewTab === 'kanban' && (
-              <div className="preview-content">
-                <div className="preview-grid-3col">
-                  <div className="preview-col">
-                    <div className="preview-col-title">Por Hacer (1)</div>
-                    <div className="preview-card">
-                      <span className="preview-tag blue">E-Commerce</span>
-                      <h4>Dashboard Analytics React</h4>
-                      <p className="text-xs text-muted">Cliente: Solaris Energy</p>
-                    </div>
-                  </div>
-                  <div className="preview-col">
-                    <div className="preview-col-title">En Progreso (2)</div>
-                    <div className="preview-card highlight">
-                      <span className="preview-tag emerald">Branding</span>
-                      <h4>Rediseño Web & App Móvil</h4>
-                      <p className="text-xs text-muted">Cliente: Acme Studio • $2,800</p>
-                    </div>
-                  </div>
-                  <div className="preview-col">
-                    <div className="preview-col-title">Completado (1)</div>
-                    <div className="preview-card">
-                      <span className="preview-tag purple">Diseño</span>
-                      <h4>Manual de Marca Konta</h4>
-                      <p className="text-xs text-muted">Cliente: Kira Coffee Co.</p>
-                    </div>
-                  </div>
-                </div>
+          <div className="hero-aetherfield-card">
+            <div className="aether-card-header">
+              <div>
+                <div className="aether-greeting">Buen día, Martín Pineda</div>
+                <div className="aether-subtext">Tus métricas e impacto financiero están listos para revisar.</div>
               </div>
-            )}
+              <div className="aether-card-tabs font-mono">
+                <button className={`aether-tab ${heroCardTab === 'kanban' ? 'active' : ''}`} onClick={() => setHeroCardTab('kanban')}>Proyectos</button>
+                <button className={`aether-tab ${heroCardTab === 'stats' ? 'active' : ''}`} onClick={() => setHeroCardTab('stats')}>Finanzas</button>
+                <button className={`aether-tab ${heroCardTab === 'invoices' ? 'active' : ''}`} onClick={() => setHeroCardTab('invoices')}>Facturas</button>
+              </div>
+            </div>
 
-            {previewTab === 'stats' && (
-              <div className="preview-content">
-                <div className="preview-stats-row">
-                  <div className="preview-stat-box">
-                    <span className="text-xs text-muted">Ingresos del Mes</span>
-                    <div className="text-2xl font-bold text-emerald-400">$4,850.00</div>
-                    <span className="text-xs text-emerald-400">↑ +14% vs mes anterior</span>
+            <div className="aether-card-content">
+              {heroCardTab === 'kanban' && (
+                <div className="aether-grid-cards">
+                  <div className="aether-mini-card">
+                    <div className="mini-card-top">
+                      <span className="mini-badge yellow">En Progreso</span>
+                      <span className="font-mono text-xs">$2,800</span>
+                    </div>
+                    <h4>Rediseño Web E-Commerce</h4>
+                    <p className="text-xs text-muted">Acme Studio • 4/4 tareas</p>
                   </div>
-                  <div className="preview-stat-box">
-                    <span className="text-xs text-muted">Facturas Pendientes</span>
-                    <div className="text-2xl font-bold text-amber-400">$3,800.00</div>
-                    <span className="text-xs text-muted">2 clientes por cobrar</span>
+                  <div className="aether-mini-card highlight-lime">
+                    <div className="mini-card-top">
+                      <span className="mini-badge black">En Revisión</span>
+                      <span className="font-mono text-xs">$4,500</span>
+                    </div>
+                    <h4>App Móvil iOS & Android</h4>
+                    <p className="text-xs text-muted">TechNova Labs • 3/4 tareas</p>
                   </div>
-                  <div className="preview-stat-box">
-                    <span className="text-xs text-muted">Horas Facturadas</span>
-                    <div className="text-2xl font-bold">42.5 hrs</div>
-                    <span className="text-xs text-muted">Tarifa: $50/hr</span>
+                  <div className="aether-mini-card">
+                    <div className="mini-card-top">
+                      <span className="mini-badge green">Completado</span>
+                      <span className="font-mono text-xs">$1,200</span>
+                    </div>
+                    <h4>Branding Kira Coffee</h4>
+                    <p className="text-xs text-muted">Kira Coffee Co. • Entregado</p>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {previewTab === 'invoices' && (
-              <div className="preview-content">
-                <div className="preview-table">
-                  <div className="preview-tr header">
-                    <span>Factura</span>
-                    <span>Cliente</span>
-                    <span>Monto</span>
-                    <span>Estado</span>
+              {heroCardTab === 'stats' && (
+                <div className="aether-grid-stats">
+                  <div className="aether-stat-block">
+                    <span className="stat-block-label">INGRESOS DEL MES</span>
+                    <div className="stat-block-value">$4,850.00</div>
+                    <span className="stat-block-change positive">↑ +14.2% este mes</span>
                   </div>
-                  <div className="preview-tr">
-                    <span className="font-mono text-xs">INV-2026-001</span>
-                    <span>Acme Studio</span>
-                    <span className="font-semibold">$1,400.00</span>
-                    <span className="status-badge pagada">Pagada</span>
+                  <div className="aether-stat-block">
+                    <span className="stat-block-label">CUENTAS POR COBRAR</span>
+                    <div className="stat-block-value">$3,800.00</div>
+                    <span className="stat-block-change warning">2 facturas pendientes</span>
                   </div>
-                  <div className="preview-tr">
-                    <span className="font-mono text-xs">INV-2026-002</span>
-                    <span>TechNova Labs</span>
-                    <span className="font-semibold">$2,250.00</span>
-                    <span className="status-badge pendiente">Pendiente</span>
+                  <div className="aether-stat-block highlight-stat">
+                    <span className="stat-block-label">HORAS FACTURADAS</span>
+                    <div className="stat-block-value">42.5 hrs</div>
+                    <span className="stat-block-change">Tarifa media: $50/h</span>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {heroCardTab === 'invoices' && (
+                <div className="aether-table-wrapper">
+                  <table className="aether-table">
+                    <thead>
+                      <tr>
+                        <th>Nº Factura</th>
+                        <th>Cliente</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="font-mono">INV-2026-001</td>
+                        <td className="font-semibold">Acme Studio</td>
+                        <td className="font-mono font-bold">$1,400.00</td>
+                        <td><span className="status-badge pagada">Pagada</span></td>
+                      </tr>
+                      <tr>
+                        <td className="font-mono">INV-2026-002</td>
+                        <td className="font-semibold">TechNova Labs</td>
+                        <td className="font-mono font-bold">$2,250.00</td>
+                        <td><span className="status-badge pendiente">Pendiente</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -364,10 +339,13 @@ export default function Landing() {
       {/* ===== FEATURES ===== */}
       <section className="section" id="features">
         <div className="section-header animate-on-scroll">
-          <span className="section-label">Funcionalidades</span>
-          <h2 className="section-title">Todo lo que necesitas</h2>
+          <span className="section-label font-mono">Funcionalidades</span>
+          <h2 className="section-title">
+            <span className="serif-title">Todo lo que necesitas,</span>
+            <span className="sans-title">en una sola pantalla</span>
+          </h2>
           <p className="section-subtitle">
-            Herramientas para dedicar más tiempo a tu trabajo y menos a la administración.
+            Herramientas diseñadas para dedicar más tiempo a tu trabajo y menos a la administración.
           </p>
         </div>
 
@@ -385,8 +363,11 @@ export default function Landing() {
       {/* ===== TESTIMONIALS ===== */}
       <section className="section testimonials-section" id="testimonials">
         <div className="section-header animate-on-scroll">
-          <span className="section-label">Prueba Social</span>
-          <h2 className="section-title">Diseñado para profesionales</h2>
+          <span className="section-label font-mono">Prueba Social</span>
+          <h2 className="section-title">
+            <span className="serif-title">Construido para profesionales,</span>
+            <span className="sans-title">amado por freelancers</span>
+          </h2>
           <p className="section-subtitle">
             Descubre por qué cientos de freelancers gestionan su negocio con Konta.
           </p>
@@ -412,25 +393,25 @@ export default function Landing() {
       {/* ===== PRICING ===== */}
       <section className="section" id="pricing">
         <div className="section-header animate-on-scroll">
-          <span className="section-label">Precios</span>
-          <h2 className="section-title">Simple y transparente</h2>
+          <span className="section-label font-mono">Precios</span>
+          <h2 className="section-title">
+            <span className="serif-title">Simple y transparente,</span>
+            <span className="sans-title">sin sorpresas</span>
+          </h2>
           <p className="section-subtitle">
             Empieza gratis. Escala cuando estés listo. Sin costos ocultos.
           </p>
         </div>
 
         <div className="pricing-grid">
-          {/* Free */}
           <div className="pricing-card animate-on-scroll" id="pricing-free">
-            <div className="pricing-plan">Free</div>
+            <div className="pricing-plan font-mono">Free</div>
             <div className="pricing-price">
               <span className="currency">$</span>
-              <span className="amount">0</span>
-              <span className="period">/mes</span>
+              <span className="amount font-sans">0</span>
+              <span className="period font-mono">/mes</span>
             </div>
-            <p className="pricing-desc">
-              Para empezar tu carrera freelance.
-            </p>
+            <p className="pricing-desc">Para empezar tu carrera freelance.</p>
             <div className="pricing-divider"></div>
             <div className="pricing-features">
               {freePlan.map((f, i) => (
@@ -440,23 +421,20 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-            <button className="btn btn-outline btn-lg" style={{ width: '100%' }} id="free-cta" onClick={() => navigate('/dashboard')}>
-              Empezar gratis
+            <button className="btn-mono-pill outline" style={{ width: '100%', justifyContent: 'center' }} id="free-cta" onClick={() => navigate('/register')}>
+              • Empezar gratis
             </button>
           </div>
 
-          {/* Pro */}
           <div className="pricing-card featured animate-on-scroll" id="pricing-pro">
-            <div className="pricing-badge">Popular</div>
-            <div className="pricing-plan">Pro</div>
+            <div className="pricing-badge font-mono">Popular</div>
+            <div className="pricing-plan font-mono">Pro</div>
             <div className="pricing-price">
               <span className="currency">$</span>
-              <span className="amount">15</span>
-              <span className="period">/mes</span>
+              <span className="amount font-sans">15</span>
+              <span className="period font-mono">/mes</span>
             </div>
-            <p className="pricing-desc">
-              Sin límites. Para freelancers que quieren crecer.
-            </p>
+            <p className="pricing-desc">Sin límites. Para freelancers que quieren crecer.</p>
             <div className="pricing-divider"></div>
             <div className="pricing-features">
               {proPlan.map((f, i) => (
@@ -466,8 +444,8 @@ export default function Landing() {
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary btn-lg" style={{ width: '100%' }} id="pro-cta" onClick={() => navigate('/dashboard')}>
-              Comenzar prueba gratis
+            <button className="btn-mono-pill" style={{ width: '100%', justifyContent: 'center' }} id="pro-cta" onClick={() => navigate('/register')}>
+              • Comenzar prueba gratis →
             </button>
           </div>
         </div>
@@ -476,23 +454,24 @@ export default function Landing() {
       {/* ===== FAQ ===== */}
       <section className="section faq-section" id="faq">
         <div className="section-header animate-on-scroll">
-          <span className="section-label">FAQ</span>
-          <h2 className="section-title">Preguntas Frecuentes</h2>
-          <p className="section-subtitle">
-            Todo lo que necesitas saber antes de comenzar.
-          </p>
+          <span className="section-label font-mono">FAQ</span>
+          <h2 className="section-title">
+            <span className="serif-title">Preguntas frecuentes,</span>
+            <span className="sans-title">respuestas claras</span>
+          </h2>
+          <p className="section-subtitle">Todo lo que necesitas saber antes de comenzar.</p>
         </div>
 
         <div className="faq-container animate-on-scroll">
           {faqs.map((faq, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={`faq-item ${openFaq === i ? 'open' : ''}`}
               onClick={() => setOpenFaq(openFaq === i ? null : i)}
             >
               <div className="faq-question">
                 <span>{faq.question}</span>
-                <span className="faq-toggle">{openFaq === i ? '−' : '+'}</span>
+                <span className="faq-toggle font-mono">{openFaq === i ? '−' : '+'}</span>
               </div>
               {openFaq === i && (
                 <div className="faq-answer">
@@ -507,13 +486,15 @@ export default function Landing() {
       {/* ===== CTA ===== */}
       <section className="section cta-section" id="cta">
         <div className="cta-box animate-on-scroll">
-          <h2>¿Listo para tomar el control?</h2>
+          <h2 className="section-title">
+            <span className="serif-title">¿Listo para tomar el control?</span>
+          </h2>
           <p>
             Únete a miles de freelancers que ya organizan su trabajo con Konta.
             Sin tarjeta de crédito.
           </p>
-          <button className="btn btn-primary btn-lg" id="cta-final" onClick={() => navigate('/dashboard')}>
-            Crear cuenta gratis {Icons.arrow}
+          <button className="btn-mono-pill" id="cta-final" onClick={() => navigate('/register')}>
+            • Crear cuenta gratis {Icons.arrow}
           </button>
         </div>
       </section>
@@ -521,18 +502,18 @@ export default function Landing() {
       {/* ===== FOOTER ===== */}
       <footer className="footer" id="footer">
         <div className="footer-inner">
-          <div className="footer-brand">
+          <div className="footer-brand font-sans">
             <div className="logo-mark-sm">K</div>
             Konta
           </div>
-          <div className="footer-links">
-            <a href="#demo">Demo</a>
+          <div className="footer-links font-mono">
+            <a href="#hero">Producto</a>
             <a href="#features">Funcionalidades</a>
             <a href="#pricing">Precios</a>
             <a href="#faq">FAQ</a>
           </div>
-          <div className="footer-copy">
-            © {new Date().getFullYear()} Konta
+          <div className="footer-copy font-mono">
+            © {new Date().getFullYear()} Konta Inc.
           </div>
         </div>
       </footer>

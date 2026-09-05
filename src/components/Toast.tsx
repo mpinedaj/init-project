@@ -1,9 +1,15 @@
 import { useEffect } from 'react'
 
-export default function Toast({ message, type = 'success', onClose }) {
+interface ToastProps {
+  message: string
+  type?: 'success' | 'error'
+  onClose: () => void
+}
+
+export default function Toast({ message, type = 'success', onClose }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (onClose) onClose()
+      onClose()
     }, 3500)
     return () => clearTimeout(timer)
   }, [onClose])

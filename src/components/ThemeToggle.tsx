@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() => {
+  const [theme, setTheme] = useState<string>(() => {
     return localStorage.getItem('konta-theme') || 'dark'
   })
 
@@ -15,7 +15,7 @@ export default function ThemeToggle() {
   }
 
   return (
-    <button 
+    <button
       className="theme-toggle-btn"
       onClick={toggleTheme}
       title={theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
